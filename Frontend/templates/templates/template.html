@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="template.css"/>
+    <title>Pose Detector</title>
+</head>
+<body>
+    <h1>Yoga Pose Detector</h1>
+
+    <main>
+    
+        <input id="tab1" type="radio" name="tabs" checked>
+        <label for="tab1">Live</label>
+            
+        <input id="tab2" type="radio" name="tabs">
+        <label for="tab2">Upload</label>
+            
+        <section id="content1">
+            <video id="l_video" width="600px" height="300px"
+            style="
+            align-self: center;
+            margin-left: 55px;
+            "
+            autoplay muted></video>
+
+            <div class="l_btns">
+                <button class="l_btn" id="startBtn">Start</button>
+                <button class="l_btn" id="predictBtn">Predict</button>
+                <button class="l_btn" id="stopBtn">Stop</button>
+            </div>
+        </section>
+            
+        <section id="content2">
+            <h2>Upload Your Video</h2>
+            <p>predict your pose with AI</p>
+
+            <div class="video_pane">
+                <input type="file" name="file" onchange="selectVideo(this);"/>
+
+                <label for="file">
+                    <video class="up_video" autoplay id="up_video" controls>
+                        <source id="up_source" type="video/mp4">
+                    </video>
+                </label>
+
+                <button class="up_submit">Predict</button>
+
+                
+            </div>
+
+        </section>
+        
+    </main>
+
+    <script>
+        // Add event listener to the startBtn button
+        document.getElementById('startBtn').addEventListener('click', () => {
+            // Get the webcam feed
+            navigator.mediaDevices.getUserMedia({video: true})
+            .then((stream) => {
+                // Assign the stream to the video element
+                let video = document.getElementById('l_video');
+                video.srcObject = stream;
+                video.play();
+            
+                // Call the function to capture frames from the video and send to Flask API every second
+                setInterval(() => {
+                    captureAndSendFrame(video);
+                }, 1000);
+            })
+            .catch((error) => {
+                console.error('Error getting video stream:', error);
+            });
+        });
+    
+        // Function to capture frames from video and send to Flask API
+        function captureAndSendFrame(video) {
+            // Create a canvas element
+            let canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the current frame from the video onto the canvas
+            let context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert the canvas to a Blob object representing the image file
+            canvas.toBlob((blob) => {
+    
+                console.log(blob);
+                // create a FormData object with the image file
+                let file = new File([blob], 'frame.png', { type: 'image/png'});
+                
+                let formData = new FormData();
+                formData.append('image', file);
+    
+                console.log(formData);
+            
+                // Send the FormData object to the Flask API
+                fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then((response) => {
+                    // Convert the base64 encoded image string from the response to an image
+                    console.log(response);
+                
+                })
+                .then((blob) => {
+                    //create an object URL for the image blob
+                    console.log(blob)
+                    let url = URL.createObjectURL(blob);
+    
+                    // Display the predicted pose image in the "l_video" element
+                    let predictedPoseImage = new Image();
+                    predictedPoseImage.onload = function() {
+                        URL.revokeObjectURL(url);
+                    };
+                    predictedPoseImage.src = url;
+                    let video = document.getElementById('l_video');
+                    video.srcObject = null;
+                    video.src = predictedPoseImage.src;
+                    video.play();
+                })
+                .catch((error) => {
+                    console.error('Error sending image to Flask API:', error);
+                });
+            }, 'image/png');
+        }
+    </script>
+</body>
+</html>

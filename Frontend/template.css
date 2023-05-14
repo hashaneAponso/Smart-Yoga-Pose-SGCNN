@@ -1,0 +1,228 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700");
+@import url("https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css");
+
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font: 14px/1 'Open Sans', sans-serif;
+  color: #555;
+  background: #eee;
+}
+
+h1 {
+  padding: 50px 0;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#content1{
+    justify-content: center;
+    align-items: center;
+}
+
+#content2{
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+h2 {
+    font-size: 20px;
+    line-height: 1;
+    margin-bottom: 0;
+  }
+
+p {
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+main {
+  min-width: 320px;
+  max-width: 800px;
+  padding: 50px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 15px;
+}
+
+section {
+  display: none;
+  padding: 20px 0 0;
+  border-top: 1px solid #ddd;
+}
+
+input {
+  display: none;
+}
+
+label {
+  display: inline-block;
+  margin: 0 0 -1px;
+  padding: 15px 25px;
+  font-weight: 600;
+  text-align: center;
+  color: #bbb;
+  border: 1px solid transparent;
+}
+
+label:before {
+  font-family: fontawesome;
+  font-weight: normal;
+  margin-right: 10px;
+}
+
+label[for*='1']:before {
+    content: '\f030';
+}
+
+label[for*='2']:before {
+  content: '\f093';
+}
+
+
+label:hover {
+  color: #888;
+  cursor: pointer;
+}
+
+input:checked + label {
+    color: #555;
+    border: 1px solid #ddd;
+    border-top: 2px solid #2575FC;
+    border-bottom: 1px solid #fff;
+}
+  
+#tab1:checked ~ #content1,
+#tab2:checked ~ #content2 {
+    display: block;
+}
+
+.video_pane{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border: 1px dashed #555;
+    padding: 8px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+input[type=file]{
+    display: block;
+}
+
+input[type=file]::file-selector-button{
+    margin-right: 20px;
+    border: 1px solid #2575FC;
+    background: #fff;
+    color: #2575FC;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background .2s ease-in-out;
+}
+
+input[type=file]::file-selector-button:hover {
+    background: #2575FC;
+    color: #fff;
+}
+
+.up_video{
+    width: 500px;
+    height: 240px;
+}
+
+.up_submit{
+    border: 1px solid #2575FC;
+    background: #2575FC;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+.up_submit:hover{
+    border: 1px solid #2575FC;
+    background: #fff;
+    color: #2575FC;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.l_btns{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.l_btn{
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+#startBtn{
+    border: 1px solid #2575FC;
+    background: #2575FC;
+    color: #fff;
+}
+
+#predictBtn{
+    border: 1px solid #ffb700;
+    background: #ffb700;
+    color: #fff;
+}
+
+#stopBtn{
+    border: 1px solid #ff005d;
+    background: #ff005d;
+    color: #fff;
+}
+
+#startBtn:hover{
+    border: 1px solid #2575FC;
+    background: #fff;
+    color: #2575FC;
+}
+
+#predictBtn:hover{
+    border: 1px solid #ffb700;
+    background: #fff;
+    color: #ffb700;
+}
+
+#stopBtn:hover{
+    border: 1px solid #ff005d;
+    background: #fff;
+    color: #ff005d;
+}
+  
+  @media screen and (max-width: 650px) {
+    label {
+      font-size: 0;
+    }
+  
+    label:before {
+      margin: 0;
+      font-size: 18px;
+    }
+  }
+  @media screen and (max-width: 400px) {
+    label {
+      padding: 15px;
+    }
+  }

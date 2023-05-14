@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css"/>
+  <title>Document</title>
+</head>
+<body>
+  <h1>YOGA POSE DETECTION</h1>
+
+  <div class="container">
+    <div class="canvas_sec">
+      <canvas id="canvas_l"></canvas>
+      <canvas id="canvas_r"></canvas>
+    </div>
+    <div class="buttons">
+      <input type="file" id="fileInput">
+      <button id="strtbtn">Start</button>
+      <button id="stpbtn">Stop</button>
+    </div>
+
+    <h2>Detected Pose: <span id="pose_name"></span></h2>
+  </div>
+
+  <script>
+    const canvas_l = document.getElementById('canvas_l');
+    canvas_l.width = 600; canvas_l.height = 340;
+    const canvas_r = document.getElementById('canvas_r');
+    canvas_r.width = 600; canvas_r.height = 340;
+    const canvas_r_ctx = canvas_r.getContext('2d');
+    const video = document.createElement('video');
+    const poseNameTag = document.getElementById('pose_name');
+    const annotatedImage = document.getElementById('annotatedImage');
+    var useWebcam = false; // flag to switch between webcam and file input video
+    var predictIntervalId = null;
+    var playIntervalId = null;
+
+    function getVideoStream() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch(error => console.error(error));
+    }
+
+    function showPrediction() {
+      const imgData = canvas_l.toDataURL('image/jpeg');
+      const file = dataURLtoFile(imgData, 'pose.jpg');
+      const formData = new FormData();
+      formData.append('image', file);
+      fetch('http://127.0.0.1:5000/predict_and_annotate', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        // if (data['prediction'] != '') {
+        //   poseNameTag.textContent = data['prediction'];
+        // }
+        poseNameTag.textContent = data['prediction'];
+        let img = new Image();
+          img.onload = () => {
+            canvas_r_ctx.drawImage(img, 0,0, img.width, img.height);
+          }
+          img.src = `data:image/png;base64,${data['image']}`;
+      })
+      .catch(error => console.error(error));
+    }
+
+    function playVideo() {
+      playIntervalId = setInterval(() => {requestAnimationFrame(drawVideo);}, 1000/30);
+      startPredict();
+    }
+
+    function stopVideo() {
+      stopPredict();
+      video.pause();
+      if (useWebcam) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+      } else {
+        video.removeAttribute('src');
+      }
+      clearInterval(playIntervalId);
+      
+      setTimeout(() => {
+        let ctx = canvas_l.getContext('2d');
+        ctx.clearRect(0, 0, canvas_l.width, canvas_l.height);
+        canvas_r_ctx.clearRect(0, 0, canvas_r.width, canvas_r.height);
+        poseNameTag.textContent = '';
+      }, 3000);
+    }
+
+    function startPredict() {
+      predictIntervalId = setInterval(showPrediction, 1000);
+    }
+
+    function stopPredict() {
+      clearInterval(predictIntervalId);
+    }
+
+    function drawVideo() {
+      const ctx = canvas_l.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas_l.width, canvas_l.height);
+    }
+    
+    // Utility function to convert data URI to a File object
+    function dataURLtoFile(dataurl, filename) {
+      var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){
+          u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, {type:mime});
+    }
+
+    function playUploadedVideo(file) {
+      video.src = URL.createObjectURL(file);
+      video.play();
+      isUpload = true;
+      isPlaying = true;
+      playVideo();
+    }
+
+    document.getElementById('strtbtn').addEventListener('click', () => {
+      useWebcam = true;
+      getVideoStream();
+      playVideo();
+    });
+
+    document.getElementById('fileInput').addEventListener('click', (event) => {
+      event.target.value = null;
+    });
+
+    document.getElementById('fileInput').addEventListener('change', (event) => {
+      useWebcam = false;
+      const file = event.target.files[0];
+      playUploadedVideo(file);
+    });
+
+    video.addEventListener('ended', (event) => {
+      isPlaying = false;
+      stopVideo();
+    });
+
+    document.getElementById('stpbtn').addEventListener('click', () => { stopVideo(); });
+
+  </script>
+</body>
+</html>
